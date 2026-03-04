@@ -38,4 +38,3 @@ Para empezar a usar la aplicación, puedes iniciar sesión con la cuenta de admi
 - **CLIENTE**: Puede registrarse por su cuenta, ver el listado de seguros, ver los detalles y descargar los PDFs, pero NO puede modificarlos ni borrarlos.
 
 ---
-© 2026 CIMA Seguros - Gestión Premium de Pólizas
