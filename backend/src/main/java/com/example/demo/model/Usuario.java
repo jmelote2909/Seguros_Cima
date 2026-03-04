@@ -5,18 +5,26 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Entity
 @Table(name = "usuarios")
+@Schema(description = "Representa a un usuario del sistema")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(description = "ID único del usuario", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
     private Long id;
 
+    @Schema(description = "Nombre de usuario para el inicio de sesión", example = "admin")
     private String username;
+
+    @Schema(description = "Contraseña hashed del usuario", example = "$2a$10$8.UnS8zQX99H.6W3m8.L... (ejemplo de BCrypt)")
     private String password;
-    private String role; // "ADMIN" or "CLIENT"
+
+    @Schema(description = "Rol del usuario en el sistema", example = "USER", allowableValues = { "ADMIN", "USER" })
+    private String role; // "ADMIN" or "USER"
 
     public Usuario() {
     }
