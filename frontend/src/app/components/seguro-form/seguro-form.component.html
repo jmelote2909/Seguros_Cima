@@ -1,0 +1,100 @@
+<div class="container animate-fade">
+  <div class="header">
+    <h1>{{ seguroToEdit ? 'Modificar Seguro' : 'Nuevo Seguro' }}</h1>
+    <p>{{ seguroToEdit ? 'Actualiza los datos de tu póliza existente' : 'Sube tu PDF y rellena los datos del seguro para
+      tu portafolio' }}</p>
+  </div>
+
+  <div class="main-content">
+    <!-- PDF Preview Section -->
+    <div class="preview-panel glass">
+      <div class="panel-header">
+        <h2>Documento PDF</h2>
+      </div>
+      <div class="upload-area" *ngIf="!pdfPreviewUrl">
+        <label for="file-upload" class="custom-file-upload">
+          <span class="upload-icon">📄</span>
+          <span class="upload-text">Elije un PDF para empezar</span>
+          <span class="upload-sub">Arrastra o haz clic aquí</span>
+        </label>
+        <input id="file-upload" type="file" (change)="onFileSelected($event)" accept="application/pdf" />
+        <div *ngIf="isUploading" class="uploader-spinner"></div>
+      </div>
+      <div class="pdf-viewer" *ngIf="pdfPreviewUrl">
+        <iframe [src]="pdfPreviewUrl" width="100%" height="100%"></iframe>
+        <button class="btn-change-pdf" (click)="pdfPreviewUrl = null">
+          <span>🔄</span> Cambiar Documento
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-panel glass">
+      <div class="panel-header">
+        <h2>Detalles del Seguro</h2>
+      </div>
+      <form [formGroup]="seguroForm" (ngSubmit)="onSubmit()" class="premium-form">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="nombre">Nombre del Seguro</label>
+            <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Seguro de Vida Plus" />
+          </div>
+
+          <div class="form-group">
+            <label for="poliza">Nº Póliza</label>
+            <input id="poliza" type="text" formControlName="poliza" placeholder="XXXX-XXXX" />
+          </div>
+
+          <div class="form-group">
+            <label for="tipoSeguro">Tipo de Seguro</label>
+            <input id="tipoSeguro" type="text" formControlName="tipoSeguro" placeholder="Ej. Hogar, Coche..." />
+          </div>
+
+          <div class="form-group">
+            <label for="compania">Compañía</label>
+            <input id="compania" type="text" formControlName="compania" placeholder="Ej. Allianz, Mapfre..." />
+          </div>
+
+          <div class="form-group">
+            <label for="tomador">Tomador de la Póliza</label>
+            <input id="tomador" type="text" formControlName="tomador" placeholder="Nombre completo" />
+          </div>
+
+          <div class="form-group">
+            <label for="fechaInicio">Fecha de Inicio</label>
+            <input id="fechaInicio" type="date" formControlName="fechaInicio" />
+          </div>
+
+          <div class="form-group">
+            <label for="fechaRenovacion">Fecha de Renovación</label>
+            <input id="fechaRenovacion" type="date" formControlName="fechaRenovacion" />
+          </div>
+
+          <div class="form-group">
+            <label for="precio">Coste Anual (€)</label>
+            <input id="precio" type="number" formControlName="precio" placeholder="0.00" />
+          </div>
+
+          <div class="form-group full-width">
+            <label for="descripcion">Descripción / Notas</label>
+            <textarea id="descripcion" formControlName="descripcion" rows="3"
+              placeholder="Detalles adicionales..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline" (click)="cancel()">
+            Volver al Listado
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="seguroForm.invalid || isSaving">
+            <span *ngIf="!isSaving">{{ seguroToEdit ? 'Actualizar Seguro' : 'Guardar Seguro' }}</span>
+            <span *ngIf="isSaving" class="loader small"></span>
+          </button>
+        </div>
+      </form>
+      <div *ngIf="successMessage" class="toast success animate-fade">
+        {{ successMessage }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,154 @@
+<div class="list-container animate-fade">
+    <header class="list-header">
+        <div class="header-content">
+            <h1>Mis Seguros</h1>
+            <p class="subtitle">Gestiona y revisa tus pólizas activas</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-secondary" (click)="loadSeguros()">
+                <span class="icon">🔄</span> Actualizar
+            </button>
+            <button class="btn-secondary" (click)="downloadList()">
+                <span class="icon">📥</span> DESCARGAR LISTADO
+            </button>
+        </div>
+    </header>
+
+    <div *ngIf="isLoading" class="state-container">
+        <div class="loader"></div>
+        <p>Sincronizando pólizas...</p>
+    </div>
+
+    <div *ngIf="!isLoading && seguros.length === 0" class="state-container empty">
+        <span class="empty-icon">📂</span>
+        <p>No se encontraron seguros registrados.</p>
+    </div>
+
+    <div class="table-wrapper glass" *ngIf="!isLoading && seguros.length > 0">
+        <table class="premium-table">
+            <thead>
+                <tr>
+                    <th>COMPAÑÍA</th>
+                    <th>SEGURO</th>
+                    <th>FECHA DE RENOVACIÓN</th>
+                    <th>COSTE ANUAL</th>
+                    <th class="actions-column">ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let seguro of seguros" class="table-row" (click)="openDetail(seguro)">
+                    <td class="col-company">
+                        <div class="company-cell">
+                            <span class="company-badge">{{ seguro.nombre.charAt(0) }}</span>
+                            <span class="company-name">{{ seguro.nombre }}</span>
+                        </div>
+                    </td>
+                    <td>{{ seguro.descripcion }}</td>
+                    <td class="col-date">{{ seguro.fechaRenovacion || '03/03/2026' }}</td>
+                    <!-- Hardcoded for mockup consistency or use real date if available -->
+                    <td class="col-price">
+                        <span class="price-pill">{{ seguro.precio | currency:'EUR' }}</span>
+                    </td>
+                    <td class="actions-column">
+                        <div class="row-actions">
+                            <button *ngIf="authService.isAdmin()" class="btn-icon btn-edit"
+                                (click)="editSeguro(seguro, $event)" title="Modificar">
+                                ✏️
+                            </button>
+                            <button *ngIf="authService.isAdmin()" class="btn-icon btn-delete"
+                                (click)="deleteSeguro(seguro.id, $event)" title="Eliminar">
+                                🗑️
+                            </button>
+                            <button class="btn-view-pdf" (click)="viewPdf(seguro.pdfUrl); $event.stopPropagation()">
+                                Ver PDF
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="total-label">COSTE TOTAL:</td>
+                    <td class="total-value">{{ calculateTotal() | currency:'EUR' }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Modal for Insurance Details (Wireframe 2) -->
+    <div class="modal-overlay" *ngIf="selectedSeguro" (click)="closeDetail()">
+        <div class="detail-modal glass animate-fade" (click)="$event.stopPropagation()">
+            <header class="detail-header">
+                <div class="title-group">
+                    <h1>SEGURO {{ selectedSeguro.nombre | uppercase }}</h1>
+                    <span class="policy-badge">PÓLIZA {{ selectedSeguro.poliza || 'XXXX' }}</span>
+                </div>
+            </header>
+
+            <div class="detail-grid">
+                <div class="info-section">
+                    <div class="info-item">
+                        <label>TIPO DE SEGURO</label>
+                        <p>{{ selectedSeguro.tipoSeguro || 'GENERAL' }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>COMPAÑÍA</label>
+                        <p>{{ selectedSeguro.nombre }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label>TOMADOR DE LA PÓLIZA</label>
+                        <p>{{ selectedSeguro.tomador || 'No especificado' }}</p>
+                    </div>
+
+                    <div class="date-group">
+                        <div class="info-item">
+                            <label>FECHA DE INICIO</label>
+                            <p>{{ selectedSeguro.fechaInicio || 'XX-XX-XXXX' }}</p>
+                        </div>
+                        <div class="info-item">
+                            <label>FECHA DE RENOVACIÓN</label>
+                            <p>{{ selectedSeguro.fechaRenovacion || 'XX-XX-XXXX' }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="financial-section">
+                    <div class="financial-card">
+                        <div class="fin-item">
+                            <span>TOTAL DIARIO</span>
+                            <span class="value">{{ (selectedSeguro.precio / 365) | currency:'EUR' }}</span>
+                        </div>
+                        <div class="fin-item">
+                            <span>TOTAL MENSUAL</span>
+                            <span class="value">{{ (selectedSeguro.precio / 12) | currency:'EUR' }}</span>
+                        </div>
+                        <div class="fin-item highlight">
+                            <span>TOTAL ANUAL</span>
+                            <span class="value">{{ selectedSeguro.precio | currency:'EUR' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="detail-footer">
+                <button class="btn-primary" (click)="downloadPdf(selectedSeguro.pdfUrl, $event)">DESCARGAR
+                    SEGURO</button>
+                <button class="btn-outline" (click)="closeDetail()">VOLVER</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal for PDF Preview -->
+    <div class="modal-overlay" *ngIf="selectedPdfUrl" (click)="closePdf()">
+        <div class="modal-container glass" (click)="$event.stopPropagation()">
+            <header class="modal-header">
+                <h3>Documento de Póliza</h3>
+                <button class="btn-close" (click)="closePdf()">&times;</button>
+            </header>
+            <div class="modal-body">
+                <iframe [src]="selectedPdfUrl" width="100%" height="700px"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
