@@ -39,11 +39,11 @@
                 <tr *ngFor="let seguro of seguros" class="table-row" (click)="openDetail(seguro)">
                     <td class="col-company">
                         <div class="company-cell">
-                            <span class="company-badge">{{ seguro.nombre.charAt(0) }}</span>
-                            <span class="company-name">{{ seguro.nombre }}</span>
+                            <span class="company-badge">{{ seguro.compania?.charAt(0) || '?' }}</span>
+                            <span class="company-name">{{ seguro.compania }}</span>
                         </div>
                     </td>
-                    <td>{{ seguro.descripcion }}</td>
+                    <td>{{ seguro.nombre }}</td>
                     <td class="col-date">{{ seguro.fechaRenovacion || '03/03/2026' }}</td>
                     <!-- Hardcoded for mockup consistency or use real date if available -->
                     <td class="col-price">
