@@ -1,70 +1,48 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeguroFormComponent } from './components/seguro-form/seguro-form.component';
-import { SeguroListComponent } from './components/seguro-list/seguro-list.component';
-import { LoginComponent } from './components/login/login.component';
-import { RegisterComponent } from './components/register/register.component';
+import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { Seguro } from './services/seguro.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SeguroFormComponent, SeguroListComponent, LoginComponent, RegisterComponent, CommonModule],
+  imports: [CommonModule, RouterOutlet],
   template: `
-    <div *ngIf="!authService.isLoggedIn()">
-      <app-login *ngIf="view === 'login'" (onRegister)="view = 'register'"></app-login>
-      <app-register *ngIf="view === 'register'" (onLogin)="view = 'login'"></app-register>
-    </div>
-    <div *ngIf="authService.isLoggedIn()">
-      <nav class="navbar glass">
-        <div class="user-info">
-          <span class="avatar">👤</span>
-          <div class="user-details">
-            <span class="username">{{ authService.getCurrentUser()?.username }}</span>
-            <span class="role">{{ authService.getCurrentUser()?.role }}</span>
-          </div>
+    <!-- Navbar: solo visible cuando el usuario está autenticado -->
+    <nav class="navbar glass" *ngIf="authService.isLoggedIn()">
+      <div class="user-info">
+        <span class="avatar">👤</span>
+        <div class="user-details">
+          <span class="username">{{ authService.getCurrentUser()?.username }}</span>
+          <span class="role">{{ authService.getCurrentUser()?.role }}</span>
         </div>
-        <div class="nav-actions">
-          <button *ngIf="authService.isAdmin()" (click)="toggleForm()" class="btn-action">
-            {{ showForm ? 'Ver Listado' : '+ AÑADIR SEGURO' }}
-          </button>
-          <button (click)="logout()" class="btn-logout">Cerrar Sesión</button>
-        </div>
-      </nav>
-      
-      <main class="main-content">
-        <app-seguro-form *ngIf="authService.isAdmin() && showForm" 
-          [seguroToEdit]="seguroToEdit" 
-          (onCancel)="toggleForm()" 
-          (onSubmitSuccess)="toggleForm()">
-        </app-seguro-form>
-        <app-seguro-list *ngIf="!showForm" (onEdit)="editSeguro($event)"></app-seguro-list>
-      </main>
-    </div>
+      </div>
+      <div class="nav-actions">
+        <button *ngIf="authService.isAdmin()" (click)="goToNuevo()" class="btn-action">
+          + AÑADIR SEGURO
+        </button>
+        <button (click)="logout()" class="btn-logout">Cerrar Sesión</button>
+      </div>
+    </nav>
+
+    <!-- El router renderiza el componente correspondiente a la ruta activa -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
   `,
   styleUrls: ['./app.css']
 })
 export class App {
-  showForm = false;
-  view: 'login' | 'register' = 'login';
-  seguroToEdit: any = null;
+  constructor(public authService: AuthService, private router: Router) { }
 
-  constructor(public authService: AuthService) { }
-
-  toggleForm() {
-    this.showForm = !this.showForm;
-    if (!this.showForm) {
-      this.seguroToEdit = null;
-    }
-  }
-
-  editSeguro(seguro: any) {
-    this.seguroToEdit = seguro;
-    this.showForm = true;
+  goToNuevo() {
+    this.router.navigate(['/seguros/nuevo']);
   }
 
   logout() {
     this.authService.logout();
-    window.location.reload();
+    this.router.navigate(['/login']);
   }
 }
+

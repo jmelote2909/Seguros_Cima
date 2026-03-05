@@ -1,7 +1,8 @@
-import { Component, inject, Output, EventEmitter } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-register',
@@ -12,8 +13,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class RegisterComponent {
     private authService = inject(AuthService);
-
-    @Output() onLogin = new EventEmitter<void>();
+    private router = inject(Router);
 
     registerData = {
         username: '',
@@ -23,6 +23,10 @@ export class RegisterComponent {
 
     error = '';
     loading = false;
+
+    goToLogin() {
+        this.router.navigate(['/login']);
+    }
 
     onSubmit() {
         if (this.registerData.password !== this.registerData.confirmPassword) {
@@ -43,7 +47,7 @@ export class RegisterComponent {
             password: this.registerData.password
         }).subscribe({
             next: () => {
-                this.onLogin.emit();
+                this.router.navigate(['/login']);
             },
             error: (err) => {
                 this.error = err.error || 'Error al registrar el usuario';
