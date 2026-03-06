@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SeguroService, Seguro } from '../../services/seguro.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-seguro-form',
@@ -26,7 +27,8 @@ export class SeguroFormComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private seguroService: SeguroService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private router: Router
     ) {
         this.seguroForm = this.fb.group({
             nombre: ['', Validators.required],
@@ -57,7 +59,7 @@ export class SeguroFormComponent implements OnInit {
     }
 
     cancel() {
-        this.onCancel.emit();
+        this.router.navigate(['/seguros']);
     }
 
     onFileSelected(event: any) {
@@ -98,7 +100,7 @@ export class SeguroFormComponent implements OnInit {
                     this.pdfPreviewUrl = null;
                     setTimeout(() => {
                         this.successMessage = null;
-                        this.onSubmitSuccess.emit();
+                        this.router.navigate(['/seguros']);
                     }, 1500);
                 },
                 error: (err) => {
